@@ -3,6 +3,8 @@ from re import A
 
 class Exchange():
     def __init__(self):
+        self.tick_size = 1
+
         self.bids = defaultdict(lambda:0)
         self.asks = defaultdict(lambda:0)
 
