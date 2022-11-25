@@ -13,6 +13,8 @@ class Exchange():
 
         self.timestamp = 0
         self.transactions = []
+
+        self.orders = {}
         # add fields to store transactions
 
     def match_bid(self, bpx, bqty, bcid, agent):        
@@ -30,19 +32,15 @@ class Exchange():
                 customer_aqty = self.ask_customers[a_cid][2]
                 curr_agent = self.ask_customers[a_cid][3]
 
-                print(bqty)
-
                 if bqty >= customer_aqty:
                     bqty -= customer_aqty
                     self.remove_ask(a_cid)
                 elif bqty < customer_aqty and bqty > 0:
                     self.asks[apx] -= bqty
                     if curr_agent is not None:
-                        # print("here")
                         curr_agent.quantity -= bqty
                     self.ask_customers[a_cid] = (self.ask_customers[a_cid][0], self.ask_customers[a_cid][1], customer_aqty - bqty, curr_agent)
                     bqty = 0
-                    break
                 else:
                     break
                 self.transactions.append({"bid_customerid": bcid, 
@@ -83,7 +81,6 @@ class Exchange():
                         curr_agent.quantity -= aqty
                     self.bid_customers[b_cid] = (self.bid_customers[b_cid][0], self.bid_customers[b_cid][1], customer_bqty - aqty, curr_agent)
                     aqty = 0
-                    break
                 else:
                     break
 
@@ -164,15 +161,18 @@ class Exchange():
     def get_transactions(self):
         return self.transactions
 
-    def add_order(self, a: Agent):
+    def add_order(self, a):
         side = a.get_side()
         if side == "AB":
             bid = a.get_theo() - a.get_spread()
             ask = a.get_theo() + a.get_spread()
             self.add_bid(bid, a.get_order_quantity(), a.get_cid(), a)
             self.add_ask(ask, a.get_order_quantity(), a.get_cid(), a)
+            self.orders[a.get_cid()] = {"bid": (bid, a.get_order_quantity()), "ask": (ask, a.get_order_quantity())}
         
         elif side == "A":
             self.add_ask(a.get_theo(), a.get_order_quantity(), a.get_cid(), a)
+            self.orders[a.get_cid()] = {"ask": (a.get_theo(), a.get_order_quantity())}
         elif side == "B":
             self.add_bid(a.get_theo(), a.get_order_quantity(), a.get_cid(), a)
+            self.orders[a.get_cid()] = {"bid": (a.get_theo(), a.get_order_quantity())}

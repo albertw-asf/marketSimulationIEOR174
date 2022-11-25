@@ -19,10 +19,10 @@ agent_arrival_rate = 10
 taker_probability = 0.4
 true_price_func = lambda t: np.sin(t / 5*60)
 temp_true_val = 100
+customer_id = 1
 
 while e.get_timestamp() < 100: 
-    customer_id = 1
-    
+ 
     ### pseudo code this ###
 
     # agent arrives by some exponential inter-arrival time simulating poisson
