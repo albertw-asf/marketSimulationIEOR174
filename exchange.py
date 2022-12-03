@@ -34,6 +34,8 @@ class Exchange():
 
                 if bqty >= customer_aqty:
                     bqty -= customer_aqty
+
+                    # destroys acid in the loop?
                     self.remove_ask(a_cid)
                 elif bqty < customer_aqty and bqty > 0:
                     self.asks[apx] -= bqty
@@ -176,3 +178,24 @@ class Exchange():
         elif side == "B":
             self.add_bid(a.get_theo(), a.get_order_quantity(), a.get_cid(), a)
             self.orders[a.get_cid()] = {"bid": (a.get_theo(), a.get_order_quantity())}
+
+    def check_cancelled_orders(self):
+        to_cancel = []
+        for cid in self.ask_customers.keys():
+            curr_time = self.get_timestamp()
+            curr_agent = self.ask_customers[cid][3]
+            order_time = self.ask_customers[cid][1]
+            if curr_time > curr_agent.get_order_duration() + order_time:
+                to_cancel.append(cid)
+        for cid in to_cancel:
+            self.remove_ask(cid)
+
+        to_cancel = []
+        for cid in self.bid_customers.keys():
+            curr_time = self.get_timestamp()
+            curr_agent = self.bid_customers[cid][3]
+            order_time = self.bid_customers[cid][1]
+            if curr_time > curr_agent.get_order_duration() + order_time:
+                to_cancel.append(cid)
+        for cid in to_cancel:
+            self.remove_bid(cid)

@@ -8,21 +8,26 @@ import matplotlib.pyplot as plt
 import random
 from scipy.stats import bernoulli
 
+def execute_policy(e: Exchange):
+    # a = SimplePolicy(100)
+    a = TightPolicy(100)
+    e.add_order(a)
 
 # pre-determine some true price curve as a function of time
 # can begin as uniform
-random.seed(88)
 e = Exchange()
 
 ### defining hyperparameters ###
-agent_arrival_rate = 10
+agent_arrival_rate = 0.1
 taker_probability = 0.4
-true_price_func = lambda t: np.sin(t / 5*60)
-temp_true_val = 100
-customer_id = 1
 
-while e.get_timestamp() < 100: 
- 
+price_function = lambda t: 100
+# future price functions can incorporate like lagged information when the agents read it 
+# true_price_func = lambda t: np.sin(t / 5*60)
+customer_id = 1
+count = 0
+
+while e.get_timestamp() < 1000:     
     ### pseudo code this ###
 
     # agent arrives by some exponential inter-arrival time simulating poisson
@@ -39,6 +44,10 @@ while e.get_timestamp() < 100:
 
     # agents arrive at same rate, some probability they are maker vs taker
     agent_arrival_time = random.expovariate(agent_arrival_rate)
+    execute_policy(e)
+
+    e.increment_timestamp(agent_arrival_time)
+    e.check_cancelled_orders()
 
     order_duration_sd = 0.0 # placeholder
     theo_sd = 2.5
@@ -48,38 +57,16 @@ while e.get_timestamp() < 100:
         mvn_means = [2, 10]
         mvn_cov = [[9, -5.625], [-5.625, 6.25]]
 
-        a = Maker((mvn_skews, mvn_means, mvn_cov), order_duration_sd, theo_sd, temp_true_val, customer_id)
+        a = Maker((mvn_skews, mvn_means, mvn_cov), order_duration_sd, theo_sd, price_function(e.get_timestamp()), customer_id)
     
     else: 
         mvn_skews = [8, 0]
         mvn_means = [2, 20]
         mvn_cov = [[9, -9], [-9, 16]]
         
-        a = Taker((mvn_skews, mvn_means, mvn_cov), order_duration_sd, theo_sd, temp_true_val, customer_id)
+        a = Taker((mvn_skews, mvn_means, mvn_cov), order_duration_sd, theo_sd, price_function(e.get_timestamp()), customer_id)
 
-    print("side", a.get_side())
-    print("order", a.get_theo(), a.get_order_quantity())
-    if not agent_is_taker:
-        print("spread", a.get_spread())
-    print("\n")
     e.add_order(a)
 
-    # show_exchange(e)
-
-    # check cancelled orders
-    for cid in e.ask_customers.keys():
-        curr_time = e.get_timestamp()
-        curr_agent = e.ask_customers[cid][3]
-        order_time = e.ask_customers[cid][1]
-        if curr_time > curr_agent.get_order_duration() + order_time:
-            e.remove_ask(cid)
-        
-    for cid in e.bid_customers.keys():
-        curr_time = e.get_timestamp()
-        curr_agent = e.bid_customers[cid][3]
-        order_time = e.bid_customers[cid][1]
-        if curr_time > curr_agent.get_order_duration() + order_time:
-            e.remove_bid(cid)
-
+    print(e.get_timestamp())
     customer_id += 1
-    e.increment_timestamp(agent_arrival_time)

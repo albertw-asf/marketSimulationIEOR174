@@ -2,7 +2,7 @@ import numpy as np
 from   scipy.stats import (multivariate_normal as mvn,
                            norm)
 from   scipy.stats._multivariate import _squeeze_output
-import random
+# import random
 
 class multivariate_skewnorm:
     

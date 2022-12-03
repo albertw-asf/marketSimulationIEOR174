@@ -4,15 +4,21 @@ from scipy.stats import skewnorm, norm
 from exchange import *
 from multivariate_skewnorm import multivariate_skewnorm
 
+#####################################
+#### global variable definitions ####
+#####################################
+
+order_duration = 500
+
 class Agent():
-    def __init__(self, aggression_params, order_time_sd, theo_sd, true_value, customerid):
+    def __init__(self, theo_sd, true_value, customerid):
 
         self.true_value = true_value
 
         # calculate agent cahracteristics
         self.theo_value = round(true_value + norm.rvs(scale=theo_sd, size=1)[0])
 
-        self.order_duration = 1800
+        self.order_duration = order_duration
         self.cid = customerid
 
     def get_theo(self):
@@ -27,9 +33,47 @@ class Agent():
     def get_true_value(self):
         return self.true_value
 
+class SimplePolicy(Agent):
+    # simple policy always quotes 97@10, 103@10 for bid-ask
+    def __init__(self, true_value):
+        theo_sd = 0
+        cid = -1
+        super().__init__(theo_sd, true_value, cid)
+        self.quantity = 10
+
+    def get_spread(self):
+        return 3
+    
+    def get_order_quantity(self):
+        return self.quantity
+    
+    def get_side(self):
+        return "AB"
+        
+class TightPolicy(Agent):
+    # tight policy always quotes 99@10, 101@10 for bid-ask
+    def __init__(self, true_value):
+        theo_sd = 0
+        cid = -2
+        super().__init__(theo_sd, true_value, cid)
+        self.quantity = 10
+        self.side = "AB"
+        self.spread = 1
+
+    def get_spread(self):
+        return self.spread
+    
+    def get_order_quantity(self):
+        return self.quantity
+
+    def get_side(self):
+        return self.side
+
+## adversarial classes ##
+
 class Maker(Agent):
     def __init__(self, aggression_params, order_time_sd, theo_sd, true_value, cid):
-        super().__init__(aggression_params, order_time_sd, theo_sd, true_value, cid)
+        super().__init__(theo_sd, true_value, cid)
 
         mvn_skews, mvn_means, mvn_cov = aggression_params
 
@@ -43,12 +87,6 @@ class Maker(Agent):
 
         self.side = "AB"
 
-    # def add_order(self):
-    #     bid = self.theo_value - self.spread
-    #     ask = self.theo_value + self.spread
-    #     self.exchange.add_bid(bid, self.quantity, self.cid)
-    #     self.exchange.add_ask(ask, self.quantity, self.cid)
-
     def get_spread(self):
         return self.spread
     
@@ -60,7 +98,7 @@ class Maker(Agent):
 
 class Taker(Agent):
     def __init__(self, aggression_params, order_time_sd, theo_sd, true_value, cid):
-        super().__init__(aggression_params, order_time_sd, theo_sd, true_value, cid)
+        super().__init__(theo_sd, true_value, cid)
     
         mvn_skews, mvn_means, mvn_cov = aggression_params
 
@@ -77,15 +115,6 @@ class Taker(Agent):
             self.side = "B"
         else: 
             self.side = "A"
-
-    # def add_order(self):
-
-    #     if self.side == "B":
-    #         # bid = self.theo_value - self.spread
-    #         self.exchange.add_bid(self.theo_value, self.quantity, self.cid)
-    #     else: 
-    #         # ask = self.theo_value + self.spread
-    #         self.exchange.add_ask(self.theo_value, self.quantity, self.cid)
     
     def get_order_quantity(self):
         return self.quantity
