@@ -20,7 +20,6 @@ class Exchange():
     def match_bid(self, bpx, bqty, bcid, agent):        
         # get better ask prices on the market 
         best_asks = [x for x in self.asks if x <= bpx]
-        original_bqty = bqty
 
         # iterate through best ask prices on the market
         for apx in best_asks:
@@ -29,6 +28,7 @@ class Exchange():
             # should already be in ascending order by timestamp
             a_cids = [cid for cid in self.ask_customers if self.ask_customers[cid][0] == apx]
             for a_cid in a_cids:
+                original_bqty = bqty
                 customer_aqty = self.ask_customers[a_cid][2]
                 curr_agent = self.ask_customers[a_cid][3]
 
@@ -62,7 +62,6 @@ class Exchange():
     def match_ask(self, apx, aqty, acid, agent):
         # get better ask prices on the market 
         best_bids = [x for x in self.bids if x >= apx]
-        original_aqty = aqty
 
         # iterate through best bid prices on the market
         for bpx in best_bids:
@@ -71,6 +70,7 @@ class Exchange():
             # should already be in ascending order by timestamp
             b_cids = [cid for cid in self.bid_customers if self.bid_customers[cid][0] == bpx]
             for b_cid in b_cids:
+                original_aqty = aqty
                 customer_bqty = self.bid_customers[b_cid][2]
                 curr_agent = self.bid_customers[b_cid][3]
 

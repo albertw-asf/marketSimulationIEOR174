@@ -33,24 +33,25 @@ class Agent():
     def get_true_value(self):
         return self.true_value
 
-class SimplePolicy(Agent):
+class MainCharacter(Agent):
     # simple policy always quotes 97@10, 103@10 for bid-ask
-    def __init__(self, true_value):
+    def __init__(self, true_value, quantity, side, spread, cid):
         theo_sd = 0
-        cid = -1
         super().__init__(theo_sd, true_value, cid)
-        self.quantity = 10
+        self.quantity = quantity
+        self.side = side
+        self.spread = spread
 
     def get_spread(self):
-        return 3
+        return self.spread
     
     def get_order_quantity(self):
         return self.quantity
     
     def get_side(self):
-        return "AB"
+        return self.side
         
-class TightPolicy(Agent):
+class SimpleTightPolicy(Agent):
     # tight policy always quotes 99@10, 101@10 for bid-ask
     def __init__(self, true_value):
         theo_sd = 0
@@ -69,6 +70,29 @@ class TightPolicy(Agent):
     def get_side(self):
         return self.side
 
+class SimpleSmallPolicy(Agent):
+    def __init__(self, true_value):
+        theo_sd = 0
+        cid = -2
+        super().__init__(theo_sd, true_value, cid)
+        self.quantity = 1
+        self.side = "AB"
+        self.spread = 1
+
+# class: Arbtrageur
+# can give perfect information or imperfect information, spread out between taking and asking based on where the top of book is
+
+# class: regression to mean -er
+
+# these classes don't have to be special designations, because 
+class LaggedPolicy(Agent):
+    # reading x ticks behind
+    pass
+
+class PsychicPolicy(Agent):
+    # reading x ticks into the future
+    pass 
+
 ## adversarial classes ##
 
 class Maker(Agent):
@@ -79,7 +103,7 @@ class Maker(Agent):
 
         self.spread, self.quantity = multivariate_skewnorm(mvn_skews, mvn_means, mvn_cov).rvs(size=1)
         self.spread = round(self.spread)
-        self.quantity = round(self.quantity)
+        self.quantity = round(abs(self.quantity))
         if self.spread < 1:
             self.spread = 1
         if self.quantity < 1:
@@ -104,7 +128,7 @@ class Taker(Agent):
 
         self.spread, self.quantity = multivariate_skewnorm(mvn_skews, mvn_means, mvn_cov).rvs(size=1)
         self.spread = round(self.spread)
-        self.quantity = round(self.quantity)
+        self.quantity = round(abs(self.quantity))
         if self.spread < 1:
             self.spread = 1
         if self.quantity < 1:
