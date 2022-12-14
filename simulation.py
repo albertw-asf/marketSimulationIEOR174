@@ -18,10 +18,7 @@ def simulate(price_fnc, policy_fnc, policy_number=3, agent_arrival_rate=0.1, tak
     taker_probability = 0.4
 
     price_function = price_fnc
-    # future price functions can incorporate like lagged information when the agents read it 
-    # true_price_func = lambda t: np.sin(t / 5*60)
     customer_id = 1
-    count = 0
 
     while e.get_timestamp() < n:     
         # agents arrive at same rate, some probability they are maker vs taker
@@ -49,8 +46,6 @@ def simulate(price_fnc, policy_fnc, policy_number=3, agent_arrival_rate=0.1, tak
             a = Taker((mvn_skews, mvn_means, mvn_cov), order_duration_sd, theo_sd, price_function(e.get_timestamp() - 3), customer_id)
 
         e.add_order(a)
-
-        # print(e.get_timestamp())
         customer_id += 1
     print("total simulation time:", e.get_timestamp())
     print("total agents:", customer_id)

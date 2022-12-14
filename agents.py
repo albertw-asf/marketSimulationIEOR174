@@ -50,50 +50,6 @@ class MainCharacter(Agent):
     
     def get_side(self):
         return self.side
-        
-class SimpleTightPolicy(Agent):
-    # tight policy always quotes 99@10, 101@10 for bid-ask
-    def __init__(self, true_value):
-        theo_sd = 0
-        cid = -2
-        super().__init__(theo_sd, true_value, cid)
-        self.quantity = 10
-        self.side = "AB"
-        self.spread = 1
-
-    def get_spread(self):
-        return self.spread
-    
-    def get_order_quantity(self):
-        return self.quantity
-
-    def get_side(self):
-        return self.side
-
-class SimpleSmallPolicy(Agent):
-    def __init__(self, true_value):
-        theo_sd = 0
-        cid = -2
-        super().__init__(theo_sd, true_value, cid)
-        self.quantity = 1
-        self.side = "AB"
-        self.spread = 1
-
-# class: Arbtrageur
-# can give perfect information or imperfect information, spread out between taking and asking based on where the top of book is
-
-# class: regression to mean -er
-
-# these classes don't have to be special designations, because 
-class LaggedPolicy(Agent):
-    # reading x ticks behind
-    pass
-
-class PsychicPolicy(Agent):
-    # reading x ticks into the future
-    pass 
-
-## adversarial classes ##
 
 class Maker(Agent):
     def __init__(self, aggression_params, order_time_sd, theo_sd, true_value, cid):
