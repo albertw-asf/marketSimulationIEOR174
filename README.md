@@ -1,9 +1,5 @@
 ## OTC Adversarial Agent Simulation
 
-This repo is for IEOR 174 project. 
+Author: Albert Wen
 
-TODO: 
-- class that defines agents? 
-- agent-agent interaction logic
-- create exchange logic
-    - necessitates creating exchange data structure and updating 
+This repo is for my IEOR 174 project: Centralized Exchange Simulation
