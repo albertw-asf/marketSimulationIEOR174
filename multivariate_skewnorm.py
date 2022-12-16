@@ -21,6 +21,25 @@ class multivariate_skewnorm:
         cdf  = norm(0, 1).logcdf(np.dot(x, self.shape))
         return _squeeze_output(np.log(2) + pdf + cdf)
 
+    def rvs_slow(self, size=1):
+        std_mvn = mvn(np.zeros(self.dim),
+                    np.eye(self.dim))
+        x       = np.empty((size, self.dim))
+        
+        # Apply rejection sampling.
+        n_samples = 0
+        while n_samples < size:
+            z = std_mvn.rvs(size=1)
+            u = np.random.uniform(0, 2*std_mvn.pdf(z))
+            if not u > self.pdf(z):
+                x[n_samples] = z
+                n_samples += 1
+        
+        # Rescale based on correlation matrix.
+        chol = np.linalg.cholesky(self.cov)
+        x = (chol @ x.T).T
+        return x
+
     def rvs(self, size=1):
         aCa      = self.shape @ self.cov @ self.shape
         delta    = (1 / np.sqrt(1 + aCa)) * self.cov @ self.shape
